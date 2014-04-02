@@ -38,11 +38,14 @@ $data_table = "xxxxxx";
 // Дальше лучше ничего не трогать лишний раз
 ignore_user_abort(1); // Продолжать работу скрипта, даже если это никому не надо
 
-if (!isset($_GET["cid"])) {
-	$cid = null;
-} else {
-	$cid = $_GET["cid"];
-}
+// check arguments
+  if(strlen($cid = $_GET['cid']) != 39)
+  {
+    $error = "HTTP/1.1 400 Invalid CID.";
+    header($error);
+    die($error);
+  }
+
 
 // Use ZIP compression?
 if (!isset($_GET["encryption"])) {
@@ -61,7 +64,6 @@ if (!isset($_GET["u4"])) {
 if ($udp == 0){
     $udp=6250;
 }
-
 
 
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
