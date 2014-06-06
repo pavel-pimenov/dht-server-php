@@ -90,6 +90,14 @@ if (!$cid || !$host ) die("Sorry, but you are not authorized to view this webpag
 $connect = mysql_pconnect($data_host, $data_login, $data_password) or die(mysql_error());
 $select_db = mysql_select_db($data_database, $connect);
 
+//[+]PPA 06.06.2014
+if (isset($_GET["stop"]))
+{
+ $query  = "delete FROM $data_table WHERE cid = '$cid' and ip = '$host'";
+ $result = mysql_query($query, $connect) or die(mysql_error());
+ mysql_close($connect);
+ die("Shutdown OK!");
+}
 
 $query = " SELECT dht_id, con_count FROM $data_table WHERE cid = '$cid'";
 $result = mysql_query($query, $connect) or die(mysql_error());
