@@ -9,24 +9,26 @@
  - cid - CID пользователя
  - encryption - использовать криптование 1/0
  - u4 - udp порт для DHT
- 
+
+
 
 CREATE TABLE  `ssa_inua`.`dhtInfo` (
-	`cid` VARCHAR( 39 ) NOT NULL,
-	`ip` VARCHAR( 15 ) NOT NULL,
-	`udp` INT( 6 ) NOT NULL,
-	`dht_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	`con_count` INT UNSIGNED ZEROFILL NOT NULL,
+	`cid` VARCHAR( 39 ) NOT NULL ,
+	`ip` VARCHAR( 15 ) NOT NULL ,
+	`udp` INT( 6 ) NOT NULL ,
+	`dht_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+	`con_count` INT UNSIGNED ZEROFILL NOT NULL ,
 	`user_agent` VARCHAR( 256 ) NOT NULL,
-	`dht_time` DATETIME
-) ENGINE = MYISAM;
+	'dht_time' DATETIME,
+        'live' int(1) DEFAULT 0
+) ENGINE = MYISAM ;
 
  Автор: SergeyAS (12.02.12) sa.stolper@gmail.com
 
 */
 
 // Настройка
-$scriptver = "12.02.2011"; // Версия
+$scriptver = "20.06.2014"; // Версия
 
 $data_host = "localhost";
 $data_database = "xxxxxx";
@@ -38,14 +40,14 @@ $data_table = "xxxxxx";
 // Дальше лучше ничего не трогать лишний раз
 ignore_user_abort(1); // Продолжать работу скрипта, даже если это никому не надо
 
-// check arguments
-  if(strlen($cid = $_GET['cid']) != 39)
+
+ // check arguments
+if(strlen($cid = $_GET['cid']) != 39)
   {
     $error = "HTTP/1.1 400 Invalid CID.";
     header($error);
     die($error);
   }
-
 
 // Use ZIP compression?
 if (!isset($_GET["encryption"])) {
@@ -57,13 +59,16 @@ if (!isset($_GET["encryption"])) {
 // UDPPort
 if (!isset($_GET["u4"])) {
 	$udp = 6250;
+//[+]PPA 10.06.2014
+    die("skip passive users!");
 } else {
 	$udp = $_GET["u4"];
 }
 
-if ($udp == 0){
-    $udp=6250;
+if ($udp < 1024){
+    die("udp < 1024");
 }
+
 
 
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -72,6 +77,16 @@ if (!isset($_SERVER['HTTP_USER_AGENT'])) {
 	$userAgent = $_SERVER['HTTP_USER_AGENT'];
 }
 
+
+if ($userAgent == 'FlylinkDC++ r501 build 9474' or 
+    $userAgent == 'FlylinkDC++ r501-x64 build 9474' or
+    $userAgent == 'FlylinkDC++ r502-beta7 build 9543'
+)
+{
+    $error = "HTTP/1.1 400 Invalid user agent - update FlylinkDC -> r502 http://www.flylinkdc.ru";
+    header($error);
+    die($error);
+}
 // Придумаем переменную, если ее нет. Совместимость между версиями PHP (?)
 if (!isset($PHP_SELF)){
 	$PHP_SELF = basename($_SERVER["PHP_SELF"]);
@@ -91,7 +106,7 @@ $connect = mysql_pconnect($data_host, $data_login, $data_password) or die(mysql_
 $select_db = mysql_select_db($data_database, $connect);
 
 //[+]PPA 06.06.2014
-if (isset($_GET["stop"]))
+if (isset($_GET["stop"])) 
 {
  $query  = "delete FROM $data_table WHERE cid = '$cid' and ip = '$host'";
  $result = mysql_query($query, $connect) or die(mysql_error());
@@ -115,6 +130,16 @@ if (!$rows){
 	$result = mysql_query($query, $connect) or die(mysql_error());
 }
 
+//[+]PPA 18.06.2014 -- TODO remove update
+if (isset($_GET["live"]))
+{
+ $query  = "UPDATE $data_table set live = 1 WHERE cid = '$cid' and ip = '$host'";
+ $result = mysql_query($query, $connect) or die(mysql_error());
+ mysql_close($connect);
+ die("Live OK!");
+}
+
+
 
 $xml_output_buffer = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Nodes>\n"; // буфер для создания xml'я
 
@@ -127,7 +152,7 @@ $result = mysql_query( " SELECT cid, ip, udp FROM $data_table  WHERE  cid != '$c
 */
 
 
-$query = " SELECT cid, ip, udp, RAND() as 'R' FROM $data_table WHERE cid != '$cid' ORDER BY 'R' LIMIT 0, 50";
+$query = "SELECT cid, ip, udp, RAND() as 'R' FROM $data_table WHERE live = 1 and cid != '$cid' ORDER BY 'R' LIMIT 0, 50";
 $result = mysql_query($query, $connect) or die(mysql_error());
 
 while ($rows = mysql_fetch_array($result, MYSQL_BOTH)){
