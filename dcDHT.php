@@ -53,7 +53,7 @@ if(strlen($cid = $_GET['cid']) != 39)
 if (!isset($_GET["encryption"])) {
 	$enc = 0;
 } else {
-	$enc = 1; //$_GET["encryption"]
+	$enc = intval($_GET["encryption"]);
 }
 
 // UDPPort
