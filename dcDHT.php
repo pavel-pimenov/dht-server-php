@@ -53,7 +53,7 @@ if(strlen($cid = $_GET['cid']) != 39)
 if (!isset($_GET["encryption"])) {
 	$enc = 0;
 } else {
-	$enc = $_GET["encryption"];
+	$enc = 1; //$_GET["encryption"]
 }
 
 // UDPPort
@@ -62,7 +62,7 @@ if (!isset($_GET["u4"])) {
 //[+]PPA 10.06.2014
     die("skip passive users!");
 } else {
-	$udp = $_GET["u4"];
+	$udp = intval($_GET["u4"]);
 }
 
 if ($udp < 1024){
@@ -101,7 +101,12 @@ header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Дата из прошло�
 
 if (!$cid || !$host ) die("Sorry, but you are not authorized to view this webpage");
 
+// escape arguments
+$cid = mysql_real_escape_string($cid);
+$userAgent = mysql_real_escape_string($userAgent);
+$host = mysql_real_escape_string($host);
 
+// connect to mysql
 $connect = mysql_pconnect($data_host, $data_login, $data_password) or die(mysql_error());
 $select_db = mysql_select_db($data_database, $connect);
 
@@ -176,4 +181,4 @@ if ($enc) {
 
 die($xml_output_buffer);
 
-php?>
+?>
