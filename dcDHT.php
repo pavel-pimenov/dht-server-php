@@ -108,7 +108,7 @@ class DhtServer {
 
         // UDP port
         if (isset($get['u4'])) {
-            $this->port = intval($_GET['u4']);
+            $this->port = intval($get['u4']);
 
             if ($this->port < 1024) {
                 $this->terminate(400, 'UDP port must be >= 1024');
