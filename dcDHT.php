@@ -167,7 +167,7 @@ class DhtServer {
     }
 
     private function terminate($code, $message) {
-        $header = sprintf('HTTP/1.1 %d %s', $code, $message);
+        $header = sprintf('%s %d %s', $_SERVER['SERVER_PROTOCOL'], $code, $message);
         header($header, null, $code);
         die($header);
     }
