@@ -1,42 +1,15 @@
 <?php
 
-/**
- * DHT service for FlylinkDC++.
- *
- * <code>
- *  http://example.com/dc_dht.php?cid=ZXO4VT7KPNYLJBLFLOR5YP3A33SPNOHYMEDJ4MY&encryption=1&u4=6250
- *
- *  cid - user CID
- *  encryption - use gzip
- *  u4 - UDP port
- *  stop - delete client from db (0|1)
- * <code>
- */
+namespace Flylink\DHT;
 
 /**
- * CREATE TABLE `dht_info` (
+ * DHT server.
  *
- * `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
- * `cid` CHAR(39) NOT NULL,
- * `ip` VARCHAR(15) NOT NULL,
- * `port` SMALLINT(5) UNSIGNED NOT NULL,
- * `conn_count` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0',
- * `user_agent` VARCHAR(256) NULL DEFAULT NULL,
- * `live` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
- * `last_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
- * PRIMARY KEY (`id`),
- * UNIQUE INDEX `CID` (`cid`)
- * ) ENGINE=MyISAM
- *
- * Автор: SergeyAS (12.02.12) sa.stolper@gmail.com
- *
+ * @author SergeyAS <sa.stolper@gmail.com>
+ * @author JhaoDa   <jhaoda@gmail.com>
  */
-
-require_once 'db.php';
-
 class DhtServer {
-    // Используем семантическое версионирование. Начнём с 2.0, отринув всё старое.
-    const VERSION = '2.0';
+    const VERSION = '2.0.1';
 
     const MODE_ADD    = 1;
     const MODE_PING   = 2;
@@ -62,7 +35,7 @@ class DhtServer {
         $this->parseRequest($_GET, $_SERVER);
 
         if (self::MODE_PING == $this->mode) {
-            $this->db->execute('UPDATE {tab'.'le} SET live = 1 WHERE cid=:cid AND ip=:ip', [
+            $this->db->execute('UPDATE {table} SET live = 1 WHERE cid=:cid AND ip=:ip', [
                 ':cid' => $this->cid, ':ip' => $this->host
             ]);
 
@@ -70,7 +43,7 @@ class DhtServer {
         }
 
         if (self::MODE_REMOVE == $this->mode) {
-            $this->db->execute('DELETE FR'.'OM {table} WHERE cid=:cid AND ip=:ip', [
+            $this->db->execute('DELETE FROM {table} WHERE cid=:cid AND ip=:ip', [
                 ':cid' => $this->cid, ':ip' => $this->host
             ]);
 
@@ -78,8 +51,8 @@ class DhtServer {
         }
 
         if (self::MODE_ADD == $this->mode) {
-            $this->db->execute('INSERT IN'.'TO {table} (cid, ip, port, user_agent)'.
-                " VALUES (:cid, :ip, :port, :ua) ON DUPLICATE KEY UPDATE conn_count = conn_count + 1", [
+            $this->db->execute('INSERT INTO {table} (cid, ip, port, user_agent)'.
+                ' VALUES (:cid, :ip, :port, :ua) ON DUPLICATE KEY UPDATE conn_count = conn_count + 1', [
                     ':cid' => $this->cid, ':ip' => $this->host, ':port' => $this->port, ':ua' => $this->userAgent
                 ]);
 
@@ -128,17 +101,17 @@ class DhtServer {
 
         $this->host = $server['REMOTE_ADDR'];
 
-        if (isset($get['live'])) {
+        if (isset($get['live']) && intval($get['live']) == 1) {
             $this->mode = self::MODE_PING;
         }
 
-        if (isset($get['stop'])) {
+        if (isset($get['stop']) && intval($get['stop']) == 1) {
             $this->mode = self::MODE_REMOVE;
         }
     }
 
     private function makeResponse() {
-        $rows = $this->db->query('SELECT cid, ip, port FR'.'OM {table} WHERE cid <> :cid AND live = 1 ORDER BY RAND() LIMIT 0, 50', [
+        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live = 1 ORDER BY RAND() LIMIT 0, 50', [
             ':cid' => $this->cid
         ]);
 
@@ -187,11 +160,8 @@ class DhtServer {
     }
 }
 
-$server = new DhtServer(array(
-    'DSN'      => 'mysql:host=127.0.0.1;dbname=dht_test',
-    'username' => 'root',
-    'password' => '111',
-    'table'    => 'dht_info'
-));
+require_once 'db.php';
+
+$server = new DhtServer(require('config.php'));
 
 $server->run();

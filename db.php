@@ -1,35 +1,45 @@
 <?php
 
-/**
- * @author JhaoDa
- */
+namespace Flylink\DHT;
 
+use PDO;
+use PDOException;
+use PDOStatement;
+
+/**
+ * Simlpe PDO wrapper.
+ *
+ * @author JhaoDa <jhaoda@gmail.com>
+ */
 class DB {
     private $text;
-    /** @var PDO */
+
+    /** @type PDO */
     private $pdo;
-    /** @var PDOStatement */
+
+    /** @type PDOStatement */
     private $statement;
-    private $options = array();
+
+    private $options = [];
 
     public function __construct($options) {
         $this->options = $options;
 
         try {
-            $this->pdo = new PDO($this->options['DSN'], $this->options['username'], $this->options['password'], array(
-                PDO::ATTR_PERSISTENT => TRUE,
+            $this->pdo = new PDO($this->options['DSN'], $this->options['username'], $this->options['password'], [
+                PDO::ATTR_PERSISTENT => true,
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-            ));
-            $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, TRUE);
+            ]);
+            $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
         } catch (PDOException $e) {
             die('Failed to create PDO instance');
         }
     }
 
-    public function query($text, $params = array()) {
+    public function query($text, $params = []) {
         try {
             $this->prepare($text);
-            $this->statement->execute(empty($params) ? NULL : $params);
+            $this->statement->execute(empty($params) ? null : $params);
 
             $result = $this->statement->fetchAll(PDO::FETCH_ASSOC);
             $this->statement->closeCursor();
@@ -40,10 +50,10 @@ class DB {
         }
     }
 
-    public function execute($text, $params = array()) {
+    public function execute($text, $params = []) {
         try {
             $this->prepare($text);
-            $this->statement->execute(empty($params) ? NULL : $params);
+            $this->statement->execute(empty($params) ? null : $params);
 
             return $this->statement->rowCount();
         } catch(PDOException $e) {
