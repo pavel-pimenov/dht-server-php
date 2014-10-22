@@ -128,15 +128,9 @@ class DhtServer {
         header('Cache-Control: no-store, no-cache, must-revalidate, pre-check=0, post-check=0');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Pragma: no-cache');
-        // header('Content-type: text/xml');
 
         if ($this->useCompression) {
-        //    ob_start('ob_gzhandler') || ob_start();
-        //        echo $response;
-        //    ob_end_flush();
-        $gz_res = gzcompress($response, 6);
-        echo $gz_res;
-
+            echo gzcompress($response);
         } else {
             echo $response;
         }
