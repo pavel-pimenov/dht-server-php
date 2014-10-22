@@ -134,7 +134,7 @@ class DhtServer {
         //    ob_start('ob_gzhandler') || ob_start();
         //        echo $response;
         //    ob_end_flush();
-        $gz_res = gzcompress($response, 9);
+        $gz_res = gzcompress($response, 6);
         echo $gz_res;
 
         } else {
