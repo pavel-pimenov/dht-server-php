@@ -12,7 +12,10 @@ CREATE TABLE `dht_info` (
     `live` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
     `last_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`cid`)
-) ENGINE=InnoDB
+) ENGINE=InnoDB;
+
+ALTER TABLE dht_info ADD INDEX i_dht_info_live (live) 
+
 ```
 
 Create file `config.php` somewhere outside the doc_root:
