@@ -101,7 +101,7 @@ class DhtServer {
 
         $this->host = $server['REMOTE_ADDR'];
 
-        if (isset($get['live']) && intval($get['live']) == 1) {
+        if (isset($get['live']) && intval($get['live']) >= 1) {
             $this->mode = self::MODE_PING;
         }
 
