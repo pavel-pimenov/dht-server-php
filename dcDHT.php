@@ -9,7 +9,7 @@ namespace Flylink\DHT;
  * @author JhaoDa   <jhaoda@gmail.com>
  */
 class DhtServer {
-    const VERSION = '2.0.2';
+    const VERSION = '2.0.3';
 
     const MODE_ADD    = 1;
     const MODE_PING   = 2;
@@ -26,6 +26,7 @@ class DhtServer {
     private $useCompression = 0;
     private $userAgent      = null;
     private $mode           = self::MODE_ADD;
+    private $live           = 0;
 
     public function __construct(array $dbOptions) {
         $this->db = new DB($dbOptions);
@@ -35,8 +36,8 @@ class DhtServer {
         $this->parseRequest($_GET, $_SERVER);
 
         if (self::MODE_PING == $this->mode) {
-            $this->db->execute('UPDATE {table} SET live = 1 WHERE cid=:cid AND ip=:ip', [
-                ':cid' => $this->cid, ':ip' => $this->host
+            $this->db->execute('UPDATE {table} SET live = :live WHERE cid=:cid AND ip=:ip', [
+                ':live' => $this->live, ':cid' => $this->cid, ':ip' => $this->host
             ]);
 
             die('Live OK!');
@@ -51,9 +52,10 @@ class DhtServer {
         }
 
         if (self::MODE_ADD == $this->mode) {
-            $this->db->execute('INSERT INTO {table} (cid, ip, port, user_agent)'.
-                ' VALUES (:cid, :ip, :port, :ua) ON DUPLICATE KEY UPDATE conn_count = conn_count + 1', [
-                    ':cid' => $this->cid, ':ip' => $this->host, ':port' => $this->port, ':ua' => $this->userAgent
+            $this->db->execute('INSERT INTO {table} (cid, ip, port, user_agent, live)'.
+                ' VALUES (:cid, :ip, :port, :ua, :live) ON DUPLICATE KEY UPDATE live = live + :live, conn_count = conn_count + 1', [
+                    ':cid' => $this->cid, ':ip' => $this->host, ':port' => $this->port, 
+                    ':ua' => $this->userAgent, ':live' => $this->live
                 ]);
 
             $this->display($this->makeResponse());
@@ -103,6 +105,7 @@ class DhtServer {
 
         if (isset($get['live']) && intval($get['live']) >= 1) {
             $this->mode = self::MODE_PING;
+            $this->live = intval($get['live']); // TOOD copy-paste.
         }
 
         if (isset($get['stop']) && intval($get['stop']) == 1) {
