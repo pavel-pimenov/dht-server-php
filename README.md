@@ -11,7 +11,7 @@ CREATE TABLE `dht_info` (
     `user_agent` VARCHAR(256) NULL DEFAULT NULL,
     `live` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
     `last_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`cid`,`ip`)
+    PRIMARY KEY (`cid`)
 ) ENGINE=InnoDB;
 
 ALTER TABLE dht_info ADD INDEX i_dht_info_live (live) 
