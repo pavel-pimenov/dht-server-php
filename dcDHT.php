@@ -31,7 +31,7 @@ class DhtServer {
     public function __construct(array $dbOptions) {
         $this->db = new DB($dbOptions);
     }
-
+    
     public function run() {
         $this->parseRequest($_GET, $_SERVER);
 
@@ -57,7 +57,9 @@ class DhtServer {
                     ':cid' => $this->cid, ':ip' => $this->host, ':port' => $this->port, 
                     ':ua' => $this->userAgent, ':live' => $this->live
                 ]);
-
+/**
+* TODO delete FROM dht_info WHERE TO_DAYS(NOW()) - TO_DAYS(last_time) > 30;
+*/     
             $this->display($this->makeResponse());
         }
     }
@@ -114,10 +116,10 @@ class DhtServer {
     }
 
     private function makeResponse() {
-        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live > 0 ORDER BY RAND() LIMIT 0, 50', [
+        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live > 0 and TO_DAYS(NOW()) - TO_DAYS(last_time) <= 10 ORDER BY RAND() LIMIT 0, 50', [
             ':cid' => $this->cid
         ]);
-
+        
         $xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Nodes>\n";
             foreach ($rows as $row) {
                 $xml .= "<Node CID=\"{$row['cid']}\" I4=\"{$row['ip']}\" U4=\"{$row['port']}\" />\n";
