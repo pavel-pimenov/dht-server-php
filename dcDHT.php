@@ -9,7 +9,7 @@ namespace Flylink\DHT;
  * @author JhaoDa   <jhaoda@gmail.com>
  */
 class DhtServer {
-    const VERSION = '2.0.3';
+    const VERSION = '2.0.4';
 
     const MODE_ADD    = 1;
     const MODE_PING   = 2;
@@ -40,7 +40,8 @@ class DhtServer {
                 ':live' => $this->live, ':cid' => $this->cid, ':ip' => $this->host
             ]);
 
-            die('Live OK!');
+            // die('Live OK!');
+            $this->display($this->makeResponse());
         }
 
         if (self::MODE_REMOVE == $this->mode) {
