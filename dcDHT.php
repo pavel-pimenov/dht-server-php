@@ -9,7 +9,7 @@ namespace Flylink\DHT;
  * @author JhaoDa   <jhaoda@gmail.com>
  */
 class DhtServer {
-    const VERSION = '2.0.4';
+    const VERSION = '2.0.5';
 
     const MODE_ADD    = 1;
     const MODE_PING   = 2;
@@ -53,8 +53,8 @@ class DhtServer {
         }
 
         if (self::MODE_ADD == $this->mode) {
-            $this->db->execute('INSERT INTO {table} (cid, ip, port, user_agent, live)'.
-                ' VALUES (:cid, :ip, :port, :ua, :live) ON DUPLICATE KEY UPDATE live = live + :live, conn_count = conn_count + 1', [
+            $this->db->execute('INSERT OR REPLACE INTO {table} (cid, ip, port, user_agent, live)'.
+                ' VALUES (:cid, :ip, :port, :ua, :live)', [
                     ':cid' => $this->cid, ':ip' => $this->host, ':port' => $this->port, 
                     ':ua' => $this->userAgent, ':live' => $this->live
                 ]);
@@ -117,7 +117,7 @@ class DhtServer {
     }
 
     private function makeResponse() {
-        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live > 0 and TO_DAYS(NOW()) - TO_DAYS(last_time) <= 10 ORDER BY RAND() LIMIT 0, 50', [
+        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live > 0 ORDER BY RANDOM() LIMIT 50', [
             ':cid' => $this->cid
         ]);
         
@@ -137,6 +137,7 @@ class DhtServer {
 
         if ($this->useCompression) {
             echo gzcompress($response);
+        //    echo $response;
         } else {
             echo $response;
         }

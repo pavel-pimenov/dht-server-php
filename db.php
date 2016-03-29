@@ -26,13 +26,19 @@ class DB {
         $this->options = $options;
 
         try {
-            $this->pdo = new PDO($this->options['DSN'], $this->options['username'], $this->options['password'], [
-                PDO::ATTR_PERSISTENT => true,
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-            ]);
+            
+/*
+$this->pdo = new PDO($this->options['DSN'], $this->options['username'], $this->options['password']);
+*/
+	    $this->pdo = new PDO('sqlite:/db/dht.sqlite');
+	    $this->pdo->setAttribute(PDO::ATTR_PERSISTENT, true);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+            $this->pdo->query('PRAGMA journal_mode=OFF');
+	    #this->pdo->query('PRAGMA temp_store=OFF');
+	    $this->pdo->query('create table if not exists dht_info (cid char(39) primary key, ip varchar(15) not null, port int not null, conn_count int not null default 0, user_agent varchar(256), live int not null default 0, last_time datetime default current_timestamp);');
         } catch (PDOException $e) {
-            die('Failed to create PDO instance');
+            die('Failed to create PDO instance' .$e->getMessage());
         }
     }
 
