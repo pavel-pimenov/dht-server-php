@@ -16,17 +16,3 @@ CREATE TABLE `dht_info` (
 
 ALTER TABLE dht_info ADD INDEX i_dht_info_live (live) 
 
-```
-
-Create file `config.php` somewhere outside the doc_root:
-
-```php
-<?php
-
-return [
-    'DSN'      => 'mysql:host=127.0.0.1;dbname=dht_test',
-    'username' => 'root',
-    'password' => '111',
-    'table'    => 'dht_info'
-];
-```
