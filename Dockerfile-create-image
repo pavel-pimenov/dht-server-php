@@ -1,0 +1,4 @@
+#docker stop fly-server-dht-docker
+#docker build -t flylinkdc/dht-server-php .
+#docker run -d -P --net=host --restart always --name fly-server-dht-docker flylinkdc/dht-server-php
+docker run -d -p 8888:8888 --name dht-server-php -v ./src:/var/www/html php:7.2-apache

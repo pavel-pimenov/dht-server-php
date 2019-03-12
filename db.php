@@ -20,11 +20,8 @@ class DB {
     /** @type PDOStatement */
     private $statement;
 
-    private $options = [];
 
-    public function __construct($options) {
-        $this->options = $options;
-
+    public function __construct() {
         try {
             
 /*
@@ -68,7 +65,7 @@ $this->pdo = new PDO($this->options['DSN'], $this->options['username'], $this->o
     }
 
     private function prepare($text) {
-        $this->text = str_replace('{table}', $this->options['table'], $text);
+        $this->text = str_replace('{table}', 'dht_info', $text);
         $this->statement = $this->pdo->prepare($this->text);
     }
 }

@@ -9,7 +9,7 @@ namespace Flylink\DHT;
  * @author JhaoDa   <jhaoda@gmail.com>
  */
 class DhtServer {
-    const VERSION = '2.0.5';
+    const VERSION = '2.0.6';
 
     const MODE_ADD    = 1;
     const MODE_PING   = 2;
@@ -28,8 +28,8 @@ class DhtServer {
     private $mode           = self::MODE_ADD;
     private $live           = 0;
 
-    public function __construct(array $dbOptions) {
-        $this->db = new DB($dbOptions);
+    public function __construct() {
+        $this->db = new DB();
     }
     
     public function run() {
@@ -166,6 +166,6 @@ class DhtServer {
 
 require_once 'db.php';
 
-$server = new DhtServer(require('config.php'));
+$server = new DhtServer();
 
 $server->run();
