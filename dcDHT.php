@@ -117,7 +117,8 @@ class DhtServer {
     }
 
     private function makeResponse() {
-        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid AND live > 0 ORDER BY RANDOM() LIMIT 50', [
+	/* TODO and live >0 */
+        $rows = $this->db->query('SELECT cid, ip, port FROM {table} WHERE cid <> :cid ORDER BY RANDOM() LIMIT 50', [
             ':cid' => $this->cid
         ]);
         
